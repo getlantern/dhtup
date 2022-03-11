@@ -4,11 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	"github.com/anacrolix/dht/v2/exts/getput"
 	"github.com/anacrolix/dht/v2/krpc"
-	"github.com/anacrolix/missinggo/v2"
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/bencode"
 )
@@ -18,16 +16,17 @@ type Resource struct {
 	Context     *Context
 	FilePath    string
 	WebSeedUrls []string
+	Salt        []byte
 }
 
-func (me Resource) fetch() (retB []byte, sleep time.Duration, err error) {
-	// There's some noise around default noSleep and default sleep times that I don't quite follow.
-	// We can override this value for specific cases below should they warrant better handling. A
-	// shorter timeout for transient network issues is a good default.
-	sleep = 2 * time.Minute
-	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Minute)
-	defer cancel()
-	res, _, err := getput.Get(ctx, me.DhtTarget, me.Context.dhtServer, nil, []byte("globalconfig"))
+func (me Resource) Open(ctx context.Context) (
+	ret io.ReadCloser,
+	// The error is temporary, try again in a bit.
+	temporary bool,
+	err error,
+) {
+	temporary = true
+	res, _, err := getput.Get(ctx, me.DhtTarget, me.Context.DhtServer, nil, me.Salt)
 	if err != nil {
 		err = fmt.Errorf("getting latest infohash: %w", err)
 		return
@@ -44,7 +43,7 @@ func (me Resource) fetch() (retB []byte, sleep time.Duration, err error) {
 	// Other config file names or resources may hold references to shared torrents. For now, we can
 	// let the old torrents accumulate because there shouldn't be much churn, and we can continue to
 	// seed them for other peers.
-	t, _ := me.Context.torrentClient.AddTorrentOpt(torrent.AddTorrentOpts{
+	t, _ := me.Context.TorrentClient.AddTorrentOpt(torrent.AddTorrentOpts{
 		InfoHash: bep46Payload.Ih,
 	})
 	// Add a local seed, assuming that trackers will fail due to same IP.
@@ -71,24 +70,12 @@ func (me Resource) fetch() (retB []byte, sleep time.Duration, err error) {
 		// Well this is awkward.
 		err = fmt.Errorf("file not found in torrent")
 		// Fixing this would require a republish, which would be on the typical publishing schedule.
-		sleep = 0
+		temporary = false
 		return
 	}
-	r := f.NewReader()
-	defer r.Close()
-	retB, err = io.ReadAll(
-		// I don't know why a standard interface doesn't exist for this.
-		missinggo.ContextedReader{
-			R:   r,
-			Ctx: ctx,
-		},
-	)
-	if err != nil {
-		err = fmt.Errorf("reading all torrent file: %w", err)
-		return
-	}
+	ret = f.NewReader()
 	// Everything good, use the default!
-	sleep = 0
+	temporary = false
 	return
 }
 

@@ -16,9 +16,9 @@ import (
 var log = golog.LoggerFor("dhtup")
 
 type Context struct {
-	dhtServer      *dht.Server
-	torrentClient  *torrent.Client
-	torrentStorage storage.ClientImplCloser
+	DhtServer      *dht.Server
+	TorrentClient  *torrent.Client
+	TorrentStorage storage.ClientImplCloser
 }
 
 func NewContext(publicIp net.IP, cacheDir string) (_ Context, err error) {
@@ -51,9 +51,9 @@ func NewContext(publicIp net.IP, cacheDir string) (_ Context, err error) {
 	}
 	tc.AddDhtServer(torrent.AnacrolixDhtServerWrapper{ds})
 	return Context{
-		dhtServer:      ds,
-		torrentClient:  tc,
-		torrentStorage: ts,
+		DhtServer:      ds,
+		TorrentClient:  tc,
+		TorrentStorage: ts,
 	}, nil
 }
 
