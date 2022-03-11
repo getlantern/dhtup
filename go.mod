@@ -1,6 +1,6 @@
 module github.com/getlantern/dhtup
 
-go 1.18
+go 1.17
 
 require (
 	github.com/anacrolix/dht/v2 v2.16.2-0.20220311024416-dd658f18fd51
