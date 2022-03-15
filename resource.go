@@ -12,11 +12,12 @@ import (
 )
 
 type Resource struct {
-	DhtTarget   krpc.ID
-	Context     *Context
-	FilePath    string
-	WebSeedUrls []string
-	Salt        []byte
+	DhtTarget    krpc.ID
+	Context      *Context
+	FilePath     string
+	WebSeedUrls  []string
+	Salt         []byte
+	MetainfoUrls []string
 }
 
 func (me Resource) Open(ctx context.Context) (
@@ -37,20 +38,22 @@ func (me Resource) Open(ctx context.Context) (
 		err = fmt.Errorf("unmarshalling bep46 payload: %w", err)
 		return
 	}
-	// We could do a dance here to determine if the torrent has changed, and return nil bytes per
-	// the fetcher interface, but if we already have the torrent it costs us nothing to read it
-	// again as it's cached. We also might want to drop old torrents that we're not using anymore.
-	// Other config file names or resources may hold references to shared torrents. For now, we can
-	// let the old torrents accumulate because there shouldn't be much churn, and we can continue to
-	// seed them for other peers.
+	// We might want to drop old torrents that we're not using anymore. Other config file names or
+	// resources may hold references to shared torrents. For now, we can let the old torrents
+	// accumulate because there shouldn't be much churn, and we can continue to seed them for other
+	// peers.
 	t, _ := me.Context.TorrentClient.AddTorrentOpt(torrent.AddTorrentOpts{
 		InfoHash: bep46Payload.Ih,
 	})
-	// Add a local seed, assuming that trackers will fail due to same IP.
+	// Add a backup method to obtain the torrent info.
+	t.UseSources(me.MetainfoUrls)
+	// Add a local seed for testing, assuming that announcing will fail to return our own IP.
 	t.AddPeers([]torrent.PeerInfo{{
 		Addr:    localhostPeerAddr{},
 		Trusted: true,
 	}})
+	// An alternate source for the torrent data, since the first peer has no other peers to
+	// bootstrap from.
 	t.AddWebSeeds(me.WebSeedUrls)
 	select {
 	case <-t.GotInfo():
