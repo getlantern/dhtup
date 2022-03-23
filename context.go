@@ -49,7 +49,7 @@ func NewContext(publicIp net.IP, cacheDir string) (_ Context, err error) {
 		ts.Close()
 		return
 	}
-	tc.AddDhtServer(torrent.AnacrolixDhtServerWrapper{ds})
+	tc.AddDhtServer(torrent.AnacrolixDhtServerWrapper{Server: ds})
 	return Context{
 		DhtServer:      ds,
 		TorrentClient:  tc,
