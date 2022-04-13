@@ -36,7 +36,13 @@ $(NAME).torrent: $(NAME) $(NAME)/global.yaml.gz
 	# We need this dir to only contain what we expect. I'm uncomfortable with
 	# recursively blowing it away.
 	rm -fv $(NAME)/.torrent.db
-	$(TORRENT_CREATE) -i='$(CONFIG_INFO_NAME)' '-u=https://globalconfig.flashlightproxy.com/' $(NAME) > $@~
+	# The trackers are TCP with IPv6 addresses. See https://github.com/getlantern/lantern-internal/issues/5469.
+	$(TORRENT_CREATE) \
+		-i='$(CONFIG_INFO_NAME)' \
+		'-u=https://globalconfig.flashlightproxy.com/' \
+		'-a=https://tracker.nanoha.org:443/announce' \
+		'-a=http://t.nyaatracker.com:80/announce' \
+		$(NAME) > $@~
 	mv $@~ $@
 
 $(NAME):
