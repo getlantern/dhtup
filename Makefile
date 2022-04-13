@@ -1,18 +1,20 @@
-# For now the info name is generalized even though we only include the global
-# config. Only the file path names are used by flashlight so this is
-# arbitrary for now.
-INFO_NAME =
 TORRENT_CREATE ?= bin/torrent-create
 DHT ?= bin/dht
 TORRENT ?= bin/torrent
 SEQ = 0
-SALT = globalconfig
+# This is the default. We should remove it and enforce that it is set. Currently `replica` and
+# `globalconfig` are supported.
 NAME = globalconfig
+SALT = $(NAME)
+BUCKET = globalconfig.flashlightproxy.com
+# The trailing / is important for both aws cli and BitTorrent web-seeding.
+S3_UPLOAD_ROOT = $(BUCKET)/dhtup/
+WEBSEED_URL = https://$(S3_UPLOAD_ROOT)
 SHELL=/bin/sh -o pipefail
 
 all: deps clean publish
 
-publish: put-dht put-source
+publish: put-dht put-source put-webdata
 
 put-dht: $(NAME).infohash dht-private-key
 	# TODO: Update the salt to "config" once we aren't hardcoding the target infohash.
@@ -27,29 +29,48 @@ put-dht: $(NAME).infohash dht-private-key
 put-source: $(NAME).torrent
 	aws s3 cp --acl public-read \
 		$(NAME).torrent \
-		s3://globalconfig.flashlightproxy.com/
+		s3://$(S3_UPLOAD_ROOT)
+
+put-webdata: $(NAME)
+	# aws cli uses Docker's dumbass directory handling
+	aws s3 cp --recursive --acl public-read \
+		$(NAME) \
+		s3://$(S3_UPLOAD_ROOT)$(NAME)
 
 $(NAME).target: dht-private-key
 	$(DHT) derive-put-target mutable --private --key "$$(cat dht-private-key)" --salt "$(SALT)" > "$@"
 
-$(NAME).torrent: $(NAME) $(NAME)/global.yaml.gz
+.PHONY: torrent
+torrent: $(NAME).torrent
+
+# Couldn't find a better way to embed the dependencies of $(NAME).torrent dynamically. They're
+# stuffed into a variable and unpacked with SECONDEXPANSION.
+globalconfig.files = globalconfig/global.yaml.gz
+replica.files = replica/backup-search-index.db
+
+.SECONDEXPANSION:
+$(NAME).torrent: $(NAME) $$($$(NAME).files)
 	# We need this dir to only contain what we expect. I'm uncomfortable with
 	# recursively blowing it away.
 	rm -fv $(NAME)/.torrent.db
-	# The trackers are TCP with IPv6 addresses. See https://github.com/getlantern/lantern-internal/issues/5469.
+	# The trackers are TCP with IPv6 addresses. See
+	# https://github.com/getlantern/lantern-internal/issues/5469.
 	$(TORRENT_CREATE) \
-		-i='$(CONFIG_INFO_NAME)' \
-		'-u=https://globalconfig.flashlightproxy.com/' \
+		'-u=$(WEBSEED_URL)' \
 		'-a=https://tracker.nanoha.org:443/announce' \
 		'-a=http://t.nyaatracker.com:80/announce' \
 		$(NAME) > $@~
 	mv $@~ $@
 
 $(NAME):
-	mkdir $@
+	mkdir -p $(NAME)
 
-$(NAME)/global.yaml.gz:
+
+globalconfig/global.yaml.gz:
 	curl -Ssf https://globalconfig.flashlightproxy.com/global.yaml.gz -o $@
+
+replica/backup-search-index.db:
+	curl -Ssf https://replica-rust-frankfurt-staging.herokuapp.com/backup-search-index -o $@
 
 $(NAME).infohash: $(NAME).torrent
 	$(TORRENT) metainfo $< infohash | cut -d : -f 1 > $@
@@ -76,10 +97,11 @@ get: $(NAME).target
 
 deps: bin/dht bin/torrent bin/torrent-create
 
-seed:
+# Don't use this from inside Fly. It's just a one-off for seeding a specific resource interactively.
+seed: $(NAME).torrent $(NAME).infohash
 	@echo seeding $$(cat $(NAME).infohash)
-	cd globalconfig && ../$(TORRENT) download --seed --no-progress ../$(NAME).torrent
+	$(TORRENT) download --seed --no-progress $(NAME).torrent
 
 clean:
 	rm -rvf $(NAME)
-	rm -f $(NAME).torrent $(NAME).infohash
+	rm -fv $(NAME).torrent $(NAME).infohash
