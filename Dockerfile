@@ -44,8 +44,8 @@ COPY Makefile .
 # TODO take from secrets/env
 COPY dht-private-key .
 COPY run ./
-# This lets us override stuff with local builds
-COPY docker-build/ /
+# This lets us override stuff with local builds. Git doesn't let us retain empty directories, and I don't like the idea of using a turdfile that gets dumped in the image root to keep it alive. Uncomment this when you want to override some contents of the image.
+#COPY docker-build/ /
 
 ENTRYPOINT ["make"]
 CMD ["publish", "seed"]
