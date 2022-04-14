@@ -3,6 +3,7 @@ package dhtup
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/anacrolix/dht/v2/exts/getput"
 	"github.com/anacrolix/dht/v2/krpc"
@@ -12,14 +13,19 @@ import (
 	"github.com/anacrolix/torrent/metainfo"
 )
 
+type OpenedResource interface {
+	missinggo.ReadContexter
+	io.Closer
+}
+
 type Resource interface {
 	// Fetches the bep46 payload for this resource
 	FetchBep46Payload(context.Context) (metainfo.Hash, error)
 	// Makes a torrent out of the info in the Bep46Payload and returns the torrent's io.ReadCloser
-	FetchTorrentFileReader(context.Context, metainfo.Hash) (missinggo.ReadContexter, bool, error)
+	FetchTorrentFileReader(context.Context, metainfo.Hash) (OpenedResource, bool, error)
 	// Fetches the bep46 payload for this resource, and returns the torrent's io.ReadCloser.
 	// This is basically, running FetchBep46Payload() and then FetchTorrentFileReader(
-	Open(ctx context.Context) (missinggo.ReadContexter, bool, error)
+	Open(ctx context.Context) (_ OpenedResource, temporary bool, _ error)
 }
 
 // ResourceImpl implements Resource
@@ -57,7 +63,7 @@ func (me *ResourceImpl) FetchBep46Payload(ctx context.Context) (metainfo.Hash, e
 }
 
 func (me *ResourceImpl) FetchTorrentFileReader(ctx context.Context, bep46PayloadInfohash metainfo.Hash) (
-	ret missinggo.ReadContexter,
+	ret OpenedResource,
 	// The error is temporary, try again in a bit.
 	temporary bool,
 	err error,
@@ -108,7 +114,7 @@ func (me *ResourceImpl) FetchTorrentFileReader(ctx context.Context, bep46Payload
 }
 
 func (me *ResourceImpl) Open(ctx context.Context) (
-	ret missinggo.ReadContexter,
+	ret OpenedResource,
 	// The error is temporary, try again in a bit.
 	temporary bool,
 	err error,
