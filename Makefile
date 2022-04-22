@@ -54,9 +54,14 @@ $(NAME).torrent: $(NAME) $$($$(NAME).files)
 	# recursively blowing it away.
 	rm -fv $(NAME)/.torrent.db
 	# The trackers are TCP with IPv6 addresses. See
-	# https://github.com/getlantern/lantern-internal/issues/5469.
+	# https://github.com/getlantern/lantern-internal/issues/5469. Use the tracker list from
+	# trackers.go.
 	$(TORRENT_CREATE) \
 		'-u=$(WEBSEED_URL)' \
+		'-n' \
+		'-a=udp://opentor.org:2710/announce' \
+		'-a=http://tracker4.itzmx.com:2710/announce' \
+		'-a=udp://tracker.opentrackr.org:1337/announce' \
 		'-a=https://tracker.nanoha.org:443/announce' \
 		'-a=http://t.nyaatracker.com:80/announce' \
 		$(NAME) > $@~

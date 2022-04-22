@@ -78,6 +78,10 @@ func (me *ResourceImpl) FetchTorrentFileReader(ctx context.Context, bep46Payload
 	})
 	// Add a backup method to obtain the torrent info.
 	t.UseSources(me.ResourceInput.MetainfoUrls)
+	// If we can't get the metainfo, we'll never be communicated these trackers, some of which may
+	// provide the only way to actively connect to the publishing nodes. See
+	// https://github.com/getlantern/lantern-internal/issues/5469.
+	t.AddTrackers([][]string{DefaultTrackers})
 	// Add a local seed for testing, assuming that announcing will fail to return our own IP.
 	t.AddPeers([]torrent.PeerInfo{{
 		Addr:    localhostPeerAddr{},
