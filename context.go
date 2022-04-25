@@ -38,7 +38,7 @@ func NewContext(publicIp net.IP, cacheDir string) (_ Context, err error) {
 	cfg.NoDHT = true
 	// Avoid predictable port assignment, and avoid colliding with the Replica UI server.
 	cfg.ListenPort = 0
-	cfg.Debug = true
+	cfg.Debug = false
 	cfg.Seed = true
 	cfg.DropMutuallyCompletePeers = true
 	ts := makeStorage(cacheDir)
