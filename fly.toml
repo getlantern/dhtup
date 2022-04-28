@@ -21,10 +21,10 @@ kill_timeout = 5
 
   [[services.tcp_checks]]
     # Wait for first publish
-    grace_period = "5m"
+    grace_period = "1m"
     # How do we handle down time during DHT publishes?
-    interval = "60s"
-    timeout = "5m"
+    interval = "1m"
+    timeout = "1m"
 
 [[services]]
   internal_port = 42069
