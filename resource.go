@@ -24,7 +24,7 @@ type Resource interface {
 	// Makes a torrent out of the info in the Bep46Payload and returns the torrent's io.ReadCloser
 	FetchTorrentFileReader(context.Context, metainfo.Hash) (OpenedResource, bool, error)
 	// Fetches the bep46 payload for this resource, and returns the torrent's io.ReadCloser.
-	// This is basically, running FetchBep46Payload() and then FetchTorrentFileReader(
+	// This is basically, running FetchBep46Payload() and then FetchTorrentFileReader()
 	Open(ctx context.Context) (_ OpenedResource, temporary bool, _ error)
 }
 
