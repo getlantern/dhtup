@@ -26,6 +26,7 @@ type Resource interface {
 	// Fetches the bep46 payload for this resource, and returns the torrent's io.ReadCloser.
 	// This is basically, running FetchBep46Payload() and then FetchTorrentFileReader()
 	Open(ctx context.Context) (_ OpenedResource, temporary bool, _ error)
+	ID() string
 }
 
 // ResourceImpl implements Resource
@@ -130,6 +131,10 @@ func (me *ResourceImpl) Open(ctx context.Context) (
 		return
 	}
 	return me.FetchTorrentFileReader(ctx, bep46Payload)
+}
+
+func (me *ResourceImpl) ID() string {
+	return me.ResourceInput.DhtTarget.String()
 }
 
 type localhostPeerAddr struct{}
