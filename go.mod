@@ -5,9 +5,12 @@ go 1.17
 require (
 	github.com/anacrolix/dht/v2 v2.16.2-0.20220311024416-dd658f18fd51
 	github.com/anacrolix/missinggo v1.3.0
+	github.com/anacrolix/publicip v0.2.0
 	github.com/anacrolix/squirrel v0.4.1-0.20220122230132-14b040773bac
 	github.com/anacrolix/torrent v1.41.1-0.20220315024234-5a61d8f6ac93
 	github.com/getlantern/golog v0.0.0-20211223150227-d4d95a44d873
+	github.com/pkg/errors v0.9.1
+	github.com/stretchr/testify v1.7.0
 )
 
 require (
@@ -60,7 +63,7 @@ require (
 	github.com/pion/turn/v2 v2.0.6 // indirect
 	github.com/pion/udp v0.1.1 // indirect
 	github.com/pion/webrtc/v3 v3.1.24-0.20220208053747-94262c1b2b38 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/dnscache v0.0.0-20210201191234-295bba877686 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
@@ -72,4 +75,5 @@ require (
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
