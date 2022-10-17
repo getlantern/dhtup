@@ -107,6 +107,9 @@ seed: $(NAME).torrent $(NAME).infohash
 	@echo seeding $$(cat $(NAME).infohash)
 	$(TORRENT) download --seed --no-progress $(NAME).torrent
 
+deploy-to-fly:
+	flyctl deploy
+
 clean:
 	rm -rvf $(NAME)
 	rm -fv $(NAME).torrent $(NAME).infohash
