@@ -57,6 +57,12 @@ func NewContext(publicIp net.IP, cacheDir string) (_ Context, err error) {
 	}, nil
 }
 
+func (c Context) Close() {
+	c.DhtServer.Close()
+	c.TorrentClient.Close()
+	c.TorrentStorage.Close()
+}
+
 func makeStorage(cacheDir string) (s storage.ClientImplCloser) {
 	// No path means a temporary file that is removed from the disk after opening. Perfect.
 	s, err := sqliteStorage.NewDirectStorage(squirrel.NewCacheOpts{})

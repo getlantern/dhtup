@@ -75,7 +75,7 @@ globalconfig/global.yaml.gz:
 	curl -Ssf https://globalconfig.flashlightproxy.com/global.yaml.gz -o $@
 
 replica/backup-search-index.db:
-	curl -Ssf https://replica-rust-frankfurt-staging.herokuapp.com/backup-search-index -o $@
+	curl -Ssf https://replica-search-aws.lantern.io/backup-search-index -o $@
 
 $(NAME).infohash: $(NAME).torrent
 	$(TORRENT) metainfo $< infohash | cut -d : -f 1 > $@
