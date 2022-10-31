@@ -13,7 +13,7 @@ torrent_public_ip_args=()
 # requires bash 4.2. welcome to the future
 [[ -v FLY_PUBLIC_IP ]] && torrent_public_ip_args+=(--public-ip "$FLY_PUBLIC_IP") || echo FLY_PUBLIC_IP not set
 while true; do
-  for NAME in globalconfig replica; do
+  for NAME in globalconfig; do
     make clean publish "NAME=$NAME" || exit $?
     echo seeding $(cat "$NAME.infohash")
   done
