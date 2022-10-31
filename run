@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# This is the entrypoint for running on fly. It sets up the environment and calls the functions we
+# need from the Makefile.
+
 set -ux
 # See if Docker passes CMD to us even though we set entrypoint in fly.toml
 for arg in "$@"; do echo cmd "$arg"; done
