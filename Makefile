@@ -1,3 +1,5 @@
+# This makefile performs app functions (it gets deployed). Do not put devops-related recipes in here.
+
 TORRENT_CREATE ?= bin/torrent-create
 DHT ?= bin/dht
 TORRENT ?= bin/torrent
@@ -106,9 +108,6 @@ deps: bin/dht bin/torrent bin/torrent-create
 seed: $(NAME).torrent $(NAME).infohash
 	@echo seeding $$(cat $(NAME).infohash)
 	$(TORRENT) download --seed --no-progress $(NAME).torrent
-
-deploy-to-fly:
-	flyctl deploy
 
 clean:
 	rm -rvf $(NAME)
