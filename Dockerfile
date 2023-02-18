@@ -3,15 +3,7 @@
 # i sleep
 FROM alpine:latest as builder
 
-# alpine doesn't have go 1.18 yet
-
-ARG GO_VERSION=1.18
-ENV GO_PACKAGE_FILE=go$GO_VERSION.linux-amd64.tar.gz
-ARG GO_PACKAGE_URL=https://go.dev/dl/$GO_PACKAGE_FILE
-ADD $GO_PACKAGE_URL ./
-RUN tar -xzf $GO_PACKAGE_FILE -C /
-ENV PATH="/go/bin:$PATH"
-ENV GOROOT=/go
+RUN apk add go
 RUN apk add gcompat
 
 WORKDIR /app
