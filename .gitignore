@@ -4,3 +4,4 @@ globalconfig*
 replica*
 !replica.target
 /.torrent.db*
+secret.env
