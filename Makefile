@@ -75,6 +75,7 @@ $(NAME):
 
 
 globalconfig/global.yaml.gz:
+	mkdir -p globalconfig
 	curl -Ssf https://globalconfig.flashlightproxy.com/global.yaml.gz -o $@
 
 replica/backup-search-index.db:
