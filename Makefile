@@ -64,7 +64,7 @@ $(NAME).torrent: $(NAME) $$($$(NAME).files)
 		'-a=udp://opentor.org:2710/announce' \
 		'-a=http://tracker4.itzmx.com:2710/announce' \
 		'-a=udp://tracker.opentrackr.org:1337/announce' \
-		'-a=udp://tracker.bittorrent.cloud:42069/announce' \
+		'-a=udp://tracker.bittorrent.cloud:1337/announce' \
 		'-a=https://tracker.nanoha.org:443/announce' \
 		'-a=http://t.nyaatracker.com:80/announce' \
 		$(NAME) > $@~
