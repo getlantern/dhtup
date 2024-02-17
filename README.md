@@ -6,6 +6,14 @@ dhtup uses a torrent client to fetch [BEP46](https://www.bittorrent.org/beps/bep
 
 To recap, BEP46 is an extension to the BitTorrent protocol that allows a single publisher to push and update torrent on the DHT. It does this by combining [BEP44](https://www.bittorrent.org/beps/bep_0044.html) -- another BitTorrent extension that allows pushing arbitrary data (not torrent) to the DHT, usually limited to 1000 bytes -- and regular torrents. In essense, when you put something on the DHT using BEP46, you're usually making a torrent and then pushing that torrent's infohash to the DHT, not the content of the torrent.
 
+## App
+
+In addition to being a library for storing stuff using torrents on the DHT, this repo contains a Fly app that generates torrents, publishes, and seeds them. It was used to publish a copy of the global config to the DHT.
+
+It's been paused with `fly scale count 0`. It can be resumed by `fly scale count 3`, as it runs in 3 different regions. The S3 upload credentials have been deactivated in IAM.
+
+I've pushed an easter egg value to ensure no old clients pick up outdated global configs from the DHT. If that fails, push a dummy torrent infohash instead.
+
 ## Example of using BEP46 to put/get data on/from the DHT
 
 Here's how to push some random data to the DHT using BEP46 and fetch it:
